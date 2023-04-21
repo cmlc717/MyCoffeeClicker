@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <title>Coffee Clicker</title>
+  <link rel="icon" href="public/coffee.jpg">
+</head>
+
+<body>
+  <div class="column-container">
+    <div class="column">
+      <div class="container left">
+        <p id="directions"><b>Directions:</b> Give our little web dev a cup of coffee by clicking the cup below! Buy and sell coffee producers to more effectively caffinate our friend! </p>
+
+        <div id = "main_game">
+          <div id="game_count">
+            <div class="counter-container">Coffee: <span id="coffee_counter">0</span></div>
+            <div class="cps-container"><span id="cps">0</span> coffee/half second</div>
+          </div>
+          <div id="big_coffee">☕️</div>
+        </div>
+
+        <img src="public/sip.png" id="sip" class="sipper">
+        <img src="public/sip2.png" id="sip2" class="sipper hidden">
+        <button id="clear">Clear Game Storage</button>
+
+        <div id = "upgrades_div">
+          <h3>UPGRADES</h3>
+          <div id = "upgrades_container"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="column">
+      <div class="column-header">
+        <img id="starbucks" src="public/mystarbucks.png" alt ="a knock off starbucks logo">
+        COFFEE PRODUCERS
+        <img id="starbucks" src="public/mystarbucks.png" alt ="a knock off starbucks logo">      
+      </div>
+      <div class="container right" id="producer_container">
+      </div>
+    </div>
+  </div>
+
+    <footer>
+      <p>Latte photo by <a href="https://unsplash.com/@nate_dumlao?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Nathan Dumlao</a> on <a href="https://unsplash.com/images/food/coffee?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></p>
+      <p>Beans photo by <a href="https://unsplash.com/de/@asthetik?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Mike Kenneally</a> on <a href="https://unsplash.com/images/food/coffee?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></p>
+      <p>Drawings by me</p>
+    </footer>
+    <script type="text/javascript" src="data.js"></script>
+    <script type="text/javascript" src="script.js"></script>
+</body>
+
+</html>
