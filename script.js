@@ -9,11 +9,11 @@
     coffeeCounter.innerText = coffeeQty;
   }
   
-  function clickCoffee(data) {
+  function clickCoffee(data, upgradesUsed) {
     data.coffee++;
     updateCoffeeView(data.coffee);
     renderProducers(data);
-    renderUpgrades(data)
+    renderUpgrades(data, upgradesUsed)
   }
   
   /**************
@@ -133,11 +133,11 @@
     }
   }
   
-  function tick(data) {
+  function tick(data, upgradesUsed) {
     data.coffee += data.totalCPS;
     updateCoffeeView(data.coffee);
     renderProducers(data);
-    renderUpgrades(data)
+    renderUpgrades(data, upgradesUsed)
   }
   
   /*************************
@@ -182,20 +182,20 @@
    *  Extra Credit Upgrades
    *************************/
   
-  function renderUpgrades(data) {
+  function renderUpgrades(data, upgradesUsed) {
     const upgradesContainer = document.getElementById("upgrades_container");
     deleteAllChildNodes(upgradesContainer);
-    let arr = unlockUpgrades(data.coffee);
+    let arr = unlockUpgrades(data.coffee, upgradesUsed);
     if (arr) {
         let divArr = arr.map((html) => makeUpgradesDiv(html));
         divArr.forEach((div) => upgradesContainer.appendChild(div));
     }
   }
   
-  //if the coffee count meets a minimum, it will unlock the one-time upgrade
-  function unlockUpgrades(coffeeCount) {
+  //one-time useable upgrades only show when they are affordable!
+  function unlockUpgrades(coffeeCount, upgradesUsed) {
     let arr = [];
-    if (coffeeCount > 100) {
+    if (coffeeCount > 500 && !upgradesUsed.ds) {
       const html = `
       <div class="upgrade-column">
         <h4>Double Shot!!</h4>
@@ -206,7 +206,7 @@
       `;
       arr.push(html);
     } 
-    if (coffeeCount > 1000) {
+    if (coffeeCount > 1000  && !upgradesUsed.re) {
       const html = `
       <div class="upgrade-column">
         <h4>Red Eye</h4>
@@ -217,7 +217,7 @@
       `;
       arr.push(html);
     }
-    if (coffeeCount > 5000) {
+    if (coffeeCount > 5000 && !upgradesUsed.co) {
       const html = `
       <div class="upgrade-column">
         <h4>CAFFEINE OVERDOSE</h4>
@@ -243,46 +243,57 @@
     return containerDiv;
   }
   
-  function upgradesButtonClick(event, data) {
+  function upgradesButtonClick(event, data, upgradesUsed) {
     if (event.target.id === "doubleShotBtn") {
-      doubleShotFunc(data);
+      doubleShotFunc(data, upgradesUsed);
     } else if (event.target.id === "redEyeBtn") {
-      redEyeFunc(data);
+      redEyeFunc(data, upgradesUsed);
     } else if (event.target.id === "overdoseBtn") {
-      overdoseFunc(data);
+      overdoseFunc(data, upgradesUsed);
     }
   }
   
-  //this upgrade makes all producers worth twice as much cps when purchased in the future
-  function doubleShotFunc(data) {
-    data.producers.forEach((producer) => producer.cps *=2);
-    data.coffee -=500;
+  function doubleShotFunc(data, upgradesUsed) {
+    if (data.coffee >= 500) {
+      data.producers.forEach((producer) => producer.cps *=2);
+      data.coffee -=500; 
+      upgradesUsed.ds = true;
+    } else {
+      window.alert("Not enough coffee!")
+    }
   }
   
   //this upgrade makes all producers cheaper
-  function redEyeFunc(data) {
-    data.producers.forEach((producer) => producer.price /=2);
-    data.coffee -= 1000
+  function redEyeFunc(data, upgradesUsed) {
+    if (data.coffee >= 1000) {
+      data.producers.forEach((producer) => producer.price /=2);
+      data.coffee -= 1000
+      upgradesUsed.re = true;
+    } else {
+      window.alert("Not enough coffee!")
+    }
   }
   
   //this upgrade gives the user one of each producer and updates their total cps accordingly
-  function overdoseFunc(data) {
-    data.producers.forEach((producer) => {
-      producer.qty += 1;
-      data.totalCPS += producer.cps;
-    });
-    updateCPSView(data.totalCPS);
-    data.coffee -=5000;
+  function overdoseFunc(data, upgradesUsed) {
+    if (data.coffee >= 5000) {
+      data.producers.forEach((producer) => {
+        producer.qty += 1;
+        data.totalCPS += producer.cps;
+      });
+      updateCPSView(data.totalCPS);
+      data.coffee -=5000;
+      upgradesUsed.co = true;
+    } else {
+      window.alert("Not enough coffee!")
+    }
   }
-  
+
   /*************************
    *  Start your engines!
    *************************/
-  // We'll begin with a check to see if we're in a web browser; if we're just running this code in node for purposes of testing, we don't want to 'start the engines'.
-  
-  // How does this check work? Node gives us access to a global variable /// called `process`, but this variable is undefined in the browser. So,
-  // we can see if we're in node by checking to see if `process` exists.
-  if (typeof process === 'undefined') {
+   let upgradesUsed = new Upgrades();
+
     //if there is saved data, load it in
     window.addEventListener("load", () => {
       data.coffee = Number(localStorage.getItem("myCount"));
@@ -302,17 +313,38 @@
         return prodObj;
       });
       data.producers = producerObjArr;
+      let upgradesStr = localStorage.getItem("myUpgrades");
+      let upgradesArr = upgradesStr.split(",");
+      let valArr = upgradesArr.map((val) => {
+        if (val.includes("true")){
+          return true;
+        }
+        return false;
+      });
+
+      let keyArr = Object.keys(upgradesUsed);
+      for (let i = 0; i < keyArr.length; i++) {
+        upgradesUsed[keyArr[i]] = valArr [i];
+      }
   
       //render the data
       updateCPSView(data.totalCPS);
       updateCoffeeView(data.coffee);
       renderProducers(data);
-      renderUpgrades(data)
+      renderUpgrades(data, upgradesUsed)
     });
   
     //save the user's progress every 10 seconds 
     setInterval(() => localStorage.setItem("myCount", data.coffee), 10000);
     setInterval(() => localStorage.setItem("myCPS", data.totalCPS), 10000);
+
+    setInterval(() => {
+        let str = "";
+        for (const key in upgradesUsed) {
+          str += upgradesUsed[key];
+        }
+        localStorage.setItem("myUpgrades", str);
+      }, 10000);    
   
     setInterval(() => {
       let str = "";
@@ -357,7 +389,7 @@
   
     // Call the tick function passing in the data object
     // altered to one per half second, a coffee themed website should be hyper!! :)
-    setInterval(() => tick(data), 500);
+    setInterval(() => tick(data, upgradesUsed), 500);
   
     // in case someone wants to clear their local storage
     const clear = document.getElementById("clear");
@@ -366,9 +398,8 @@
       location.reload();
     });
   
-    //upgrade button, I avoided making them one-time upgrades to not alter previous functions
+    //upgrade button
     const upgradesContainer = document.getElementById('upgrades_container');
     upgradesContainer.addEventListener('click', event => {
-      upgradesButtonClick(event, data);
+      upgradesButtonClick(event, data, upgradesUsed);
     });
-  }
